@@ -1,0 +1,2261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VerdeChat INFINITY | Gerador de Landing Pages</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            background-color: var(--bg-body, #0f0f0f);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s ease;
+            overflow: hidden;
+        }
+
+        :root {
+            --bg-body: #0f0f0f;
+            --app-bg: #0a0a0a;
+            --sidebar-bg: #0c0c0c;
+            --chat-bg: #0a0f0a;
+            --topbar-bg: #071007;
+            --input-bg: #121e12;
+            --text-primary: #e2f0e2;
+            --text-secondary: #b0e4b0;
+            --border-color: #1f4f1f;
+            --accent: #2e7d32;
+            --accent-light: #4caf4c;
+            --bubble-user: #154015;
+            --bubble-bot: #131f13;
+            --shadow: rgba(0,10,0,0.6);
+            --sidebar-width: 30%;
+            --chat-width: 70%;
+            --font-size-base: 0.95rem;
+            --message-spacing: 18px;
+        }
+
+        body.light-theme {
+            --bg-body: #e8f0e8;
+            --app-bg: #ffffff;
+            --sidebar-bg: #f0f7f0;
+            --chat-bg: #f5fff5;
+            --topbar-bg: #e8f3e8;
+            --input-bg: #ffffff;
+            --text-primary: #1a2a1a;
+            --text-secondary: #2a4a2a;
+            --border-color: #a0d0a0;
+            --accent: #4caf4c;
+            --accent-light: #81c784;
+            --bubble-user: #c8e6c9;
+            --bubble-bot: #f1f8f1;
+            --shadow: rgba(0,50,0,0.1);
+        }
+
+        body {
+            font-size: var(--font-size-base);
+        }
+
+        .chat-messages {
+            gap: var(--message-spacing);
+        }
+
+        .app-container {
+            display: flex;
+            width: 100vw;
+            max-width: 1600px;
+            height: 100vh;
+            max-height: 100vh;
+            background-color: var(--app-bg);
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px var(--shadow), 0 0 0 1px var(--border-color);
+            position: relative;
+        }
+
+        .history-sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            transition: width 0.3s ease, transform 0.3s ease, padding 0.3s ease;
+            transform: translateX(0);
+            flex-shrink: 0;
+            overflow: hidden;
+            min-width: 200px;
+        }
+
+        .history-sidebar.closed {
+            width: 0;
+            padding: 0;
+            transform: translateX(-100%);
+            border-right: none;
+            min-width: 0;
+        }
+
+        .history-sidebar.closed * {
+            display: none;
+        }
+
+        .history-header {
+            padding: 0 18px 18px 18px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .history-header i {
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .history-header h2 {
+            font-size: 1.3rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 0;
+        }
+
+        .history-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .history-list::-webkit-scrollbar-track {
+            background: var(--sidebar-bg);
+        }
+
+        .history-list::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 20px;
+        }
+
+        .history-item {
+            background: var(--chat-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 15px 18px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-primary);
+        }
+
+        .history-item:hover {
+            background: var(--accent-light);
+            border-color: var(--accent);
+            color: #000;
+        }
+
+        .history-item .history-title {
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+
+        .history-item:hover .history-title {
+            color: #000;
+        }
+
+        .history-item .history-preview {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .new-chat-btn {
+            margin: 10px 18px 5px 18px;
+            background: transparent;
+            border: 1px dashed var(--accent);
+            color: var(--text-secondary);
+            border-radius: 40px;
+            padding: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+        .new-chat-btn:hover {
+            background: var(--accent-light);
+            border: 1px solid var(--accent);
+            color: #000;
+        }
+
+        .chat-main {
+            width: var(--chat-width);
+            display: flex;
+            flex-direction: column;
+            background-color: var(--chat-bg);
+            transition: width 0.3s ease;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-main.expanded {
+            width: 100%;
+        }
+
+        .top-bar {
+            padding: 12px 16px;
+            background: var(--topbar-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            gap: 8px;
+            flex-wrap: nowrap;
+            min-height: 60px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .logo-icon {
+            background: var(--accent);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 12px var(--accent);
+            flex-shrink: 0;
+        }
+
+        .logo-icon i {
+            font-size: 1.5rem;
+            color: black;
+        }
+
+        .logo-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #b0fcb0, #60c060);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            white-space: nowrap;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .action-btn, .theme-btn, .sound-btn, .tools-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+        .action-btn:hover, .theme-btn:hover, .sound-btn:hover, .tools-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent-light);
+        }
+
+        .tools-btn.active, .sound-btn.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px 16px 10px 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--message-spacing);
+            background: radial-gradient(circle at 20% 30%, var(--chat-bg), var(--app-bg));
+            min-height: 0;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: var(--chat-bg);
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 20px;
+        }
+
+        .message {
+            display: flex;
+            max-width: 92%;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+        }
+
+        .message .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 6px;
+            flex-shrink: 0;
+            font-size: 0.9rem;
+        }
+
+        .message.user .avatar {
+            background: var(--accent);
+            color: black;
+            border: 1px solid var(--accent-light);
+        }
+
+        .message.bot .avatar {
+            background: var(--sidebar-bg);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+
+        .bubble {
+            padding: 12px 16px;
+            border-radius: 25px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+            max-width: calc(100% - 50px);
+            box-shadow: 0 4px 8px var(--shadow);
+            display: inline-block;
+            font-size: 0.95rem;
+        }
+
+        .message.user .bubble {
+            background: var(--bubble-user);
+            color: var(--text-primary);
+            border-bottom-right-radius: 6px;
+            border: 1px solid var(--accent);
+        }
+
+        .message.bot .bubble {
+            background: var(--bubble-bot);
+            color: var(--text-primary);
+            border-bottom-left-radius: 6px;
+            border: 1px solid var(--accent);
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 5px;
+            padding: 12px 18px;
+            background: var(--bubble-bot);
+            border-radius: 40px;
+            width: fit-content;
+            border: 1px solid var(--accent);
+        }
+
+        .typing-indicator span {
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: blink 1.4s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes blink {
+            0%, 60%, 100% { opacity: 0.4; transform: scale(0.8); }
+            30% { opacity: 1; transform: scale(1.2); background: var(--accent-light); }
+        }
+
+        .quick-questions-container {
+            background: var(--topbar-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 6px 12px 4px 12px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .quick-questions-scroll {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) var(--topbar-bg);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .quick-questions-scroll::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .quick-questions-scroll::-webkit-scrollbar-track {
+            background: var(--topbar-bg);
+            border-radius: 10px;
+        }
+
+        .quick-questions-scroll::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 10px;
+        }
+
+        .quick-question-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            padding: 5px 14px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .quick-question-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent-light);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .chat-input-area {
+            padding: 8px 12px 14px 12px;
+            background: var(--topbar-bg);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 60px;
+            padding: 12px 18px;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            outline: none;
+            min-width: 0;
+            height: 44px;
+        }
+
+        .chat-input-area input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.3);
+        }
+
+        .chat-input-area input::placeholder {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .send-btn {
+            background: var(--accent);
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid var(--accent-light);
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            background: var(--accent-light);
+            color: black;
+            transform: rotate(5deg) scale(1.05);
+        }
+
+        .history-toggle {
+            position: absolute;
+            left: var(--sidebar-width);
+            top: 50%;
+            transform: translateY(-50%);
+            width: 26px;
+            height: 50px;
+            background: var(--accent);
+            border: 2px solid var(--accent-light);
+            border-left: none;
+            border-radius: 0 20px 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            z-index: 200;
+            transition: left 0.3s ease;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+        }
+
+        .history-toggle i {
+            font-size: 1rem;
+        }
+
+        .history-toggle:hover {
+            background: var(--accent-light);
+        }
+
+        .history-toggle.closed {
+            left: 0;
+        }
+
+        .history-toggle.closed i {
+            transform: rotate(180deg);
+        }
+
+        .tools-panel, .settings-panel {
+            position: fixed;
+            right: -100%;
+            top: 0;
+            width: 100%;
+            max-width: 450px;
+            height: 100vh;
+            background: var(--sidebar-bg);
+            border-left: 2px solid var(--accent);
+            box-shadow: -5px 0 25px rgba(0,0,0,0.3);
+            transition: right 0.3s ease;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .tools-panel.open, .settings-panel.open {
+            right: 0;
+        }
+
+        .tools-header, .settings-header {
+            padding: 16px 18px 12px 18px;
+            border-bottom: 2px solid var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: var(--sidebar-bg);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .tools-header h3, .settings-header h3 {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .close-tools, .close-settings {
+            background: var(--accent);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+
+        .close-tools:hover, .close-settings:hover {
+            background: var(--accent-light);
+            transform: scale(1.05);
+        }
+
+        .tools-tabs {
+            display: flex;
+            gap: 4px;
+            padding: 10px 14px;
+            background: var(--topbar-bg);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 60px;
+            background: var(--sidebar-bg);
+            z-index: 9;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+
+        .tools-tab {
+            flex: 1;
+            padding: 6px 10px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+            min-width: 55px;
+            white-space: nowrap;
+        }
+
+        .tools-tab i {
+            margin-right: 4px;
+        }
+
+        .tools-tab:hover {
+            background: var(--accent-light);
+            color: white;
+        }
+
+        .tools-tab.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent-light);
+        }
+
+        .tools-content {
+            flex: 1;
+            padding: 14px;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .tools-category {
+            display: none;
+        }
+
+        .tools-category.active {
+            display: block;
+        }
+
+        .category-title {
+            font-size: 0.95rem;
+            color: var(--accent);
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .tool-card {
+            background: var(--chat-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .tool-card:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .tool-card i {
+            font-size: 1.2rem;
+            color: var(--accent);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .tool-card:hover i {
+            color: white;
+        }
+
+        .tool-card span {
+            font-size: 0.7rem;
+            color: var(--text-primary);
+        }
+
+        .tool-card:hover span {
+            color: white;
+        }
+
+        .tool-result-area {
+            margin-top: 15px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .tool-result-header {
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .tool-result-content {
+            background: var(--input-bg);
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: var(--text-primary);
+            max-height: 400px;
+            overflow-y: auto;
+            word-wrap: break-word;
+        }
+
+        .tool-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .tool-input-group input, .tool-input-group textarea {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px 12px;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            resize: vertical;
+            width: 100%;
+        }
+
+        .tool-input-group textarea {
+            min-height: 60px;
+        }
+
+        .tool-input-group button {
+            background: var(--accent);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .tool-input-group button:hover {
+            background: var(--accent-light);
+        }
+
+        .settings-content {
+            padding: 14px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .settings-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .settings-section:last-child {
+            border-bottom: none;
+        }
+
+        .settings-section-title {
+            font-size: 0.95rem;
+            color: var(--accent);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .settings-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .settings-option:last-child {
+            border-bottom: none;
+        }
+
+        .settings-option-label {
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+
+        .settings-option-desc {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--input-bg);
+            transition: 0.3s;
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: var(--text-secondary);
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px);
+            background-color: white;
+        }
+
+        .settings-select {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 10px;
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .settings-range {
+            width: 120px;
+            background: var(--input-bg);
+            height: 4px;
+            border-radius: 2px;
+            -webkit-appearance: none;
+            flex-shrink: 0;
+        }
+
+        .settings-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        .settings-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .settings-btn {
+            background: var(--accent);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+            flex: 1;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .settings-btn:hover {
+            background: var(--accent-light);
+        }
+
+        .settings-btn-secondary {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .settings-btn-secondary:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .settings-info {
+            background: var(--input-bg);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 12px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        /* Jogos */
+        .hangman-game, .quiz-game, .tic-tac-toe { text-align: center; }
+        .hangman-word { font-size: 1.8rem; letter-spacing: 6px; font-family: monospace; margin: 12px 0; }
+        .hangman-letters { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 12px 0; }
+        .letter-btn { background: var(--accent); border: none; color: white; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: bold; }
+        .letter-btn:hover:not(:disabled) { background: var(--accent-light); transform: scale(1.05); }
+        .letter-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .game-controls { display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+        .game-btn { background: var(--accent); border: none; color: white; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; }
+        .game-btn:hover { background: var(--accent-light); }
+        .quiz-question { font-size: 1rem; margin-bottom: 12px; font-weight: bold; }
+        .quiz-options { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
+        .quiz-option { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 10px; cursor: pointer; text-align: left; font-size: 0.85rem; }
+        .quiz-option:hover { background: var(--accent); color: white; }
+        
+        .ttt-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            background: var(--chat-bg);
+            padding: 8px;
+            border-radius: 16px;
+            margin: 12px 0;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .ttt-cell {
+            aspect-ratio: 1;
+            background: var(--input-bg);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 60px;
+        }
+
+        .ttt-cell:hover {
+            background: var(--accent-light);
+            transform: scale(1.02);
+        }
+
+        .ttt-status {
+            font-size: 0.95rem;
+            margin: 8px 0;
+            padding: 8px;
+            border-radius: 8px;
+            background: var(--input-bg);
+            text-align: center;
+        }
+
+        .ttt-btn {
+            background: var(--accent);
+            border: none;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+
+        .ttt-btn:hover {
+            background: var(--accent-light);
+            transform: scale(1.02);
+        }
+
+        .forca-letra {
+            background: var(--accent);
+            border: none;
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .forca-letra:hover:not(:disabled) {
+            background: var(--accent-light);
+            transform: scale(1.05);
+        }
+
+        .forca-letra:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .quiz-opcao {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+
+        .quiz-opcao:hover {
+            background: var(--accent);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .ttt-mode-btn {
+            background: var(--accent);
+            border: none;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .ttt-mode-btn:hover {
+            background: var(--accent-light);
+        }
+
+        /* ============================================
+           RESPONSIVIDADE MOBILE CORRIGIDA
+           ============================================ */
+        @media (max-width: 768px) {
+            .app-container {
+                width: 100vw;
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            /* SIDEBAR - FECHA POR PADRÃO NO MOBILE */
+            .history-sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 280px;
+                max-width: 85%;
+                height: 100%;
+                z-index: 150;
+                transform: translateX(-100%);
+                border-radius: 0;
+                box-shadow: 2px 0 20px rgba(0,0,0,0.5);
+                transition: transform 0.3s ease;
+                padding: 16px 0;
+                background: var(--sidebar-bg);
+                border-right: 1px solid var(--border-color);
+                min-width: 0;
+            }
+
+            .history-sidebar.open {
+                transform: translateX(0) !important;
+            }
+
+            .history-sidebar.closed {
+                transform: translateX(-100%);
+                width: 280px;
+                padding: 16px 0;
+            }
+
+            .history-sidebar.closed * {
+                display: none;
+            }
+
+            .history-sidebar.open * {
+                display: flex !important;
+            }
+
+            .history-sidebar.open .history-list {
+                display: flex !important;
+            }
+
+            /* CHAT MAIN OCUPA 100% */
+            .chat-main {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .chat-main.expanded {
+                width: 100%;
+            }
+
+            /* BOTÃO MENU HAMBURGER - VISÍVEL NO MOBILE */
+            .mobile-menu-btn {
+                display: flex !important;
+                background: var(--input-bg);
+                border: 1px solid var(--border-color);
+                color: var(--text-secondary);
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                align-items: center;
+                justify-content: center;
+                font-size: 1rem;
+                cursor: pointer;
+                flex-shrink: 0;
+            }
+
+            .mobile-menu-btn:hover {
+                background: var(--accent);
+                color: white;
+            }
+
+            .mobile-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.6);
+                z-index: 140;
+            }
+
+            .mobile-overlay.active {
+                display: block;
+            }
+
+            /* TOGGLE DO DESKTOP ESCONDIDO NO MOBILE */
+            .history-toggle {
+                display: none !important;
+            }
+
+            .top-bar {
+                padding: 10px 12px;
+                gap: 4px;
+                min-height: 52px;
+            }
+
+            .logo-text {
+                font-size: 0.9rem;
+            }
+
+            .logo-icon {
+                width: 32px;
+                height: 32px;
+            }
+
+            .logo-icon i {
+                font-size: 1.2rem;
+            }
+
+            .action-btn, .theme-btn, .sound-btn, .tools-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
+
+            .chat-messages {
+                padding: 12px 12px 8px 12px;
+            }
+
+            .message {
+                max-width: 96%;
+            }
+
+            .bubble {
+                padding: 10px 14px;
+                font-size: 0.9rem;
+                max-width: calc(100% - 44px);
+            }
+
+            .message .avatar {
+                width: 28px;
+                height: 28px;
+                font-size: 0.8rem;
+                margin: 0 4px;
+            }
+
+            .quick-questions-container {
+                padding: 4px 8px 2px 8px;
+            }
+
+            .quick-question-btn {
+                font-size: 0.7rem;
+                padding: 4px 10px;
+            }
+
+            .chat-input-area {
+                padding: 6px 10px 10px 10px;
+                gap: 8px;
+            }
+
+            .chat-input-area input {
+                padding: 10px 14px;
+                font-size: 0.9rem;
+                height: 40px;
+            }
+
+            .chat-input-area input::placeholder {
+                font-size: 0.8rem;
+            }
+
+            .send-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.1rem;
+            }
+
+            .tools-panel, .settings-panel {
+                max-width: 100%;
+                width: 100%;
+                right: -100%;
+            }
+
+            .tools-panel.open, .settings-panel.open {
+                right: 0;
+            }
+
+            .tools-tabs {
+                padding: 8px 10px;
+                gap: 4px;
+                top: 56px;
+            }
+
+            .tools-tab {
+                font-size: 0.65rem;
+                padding: 5px 8px;
+                min-width: 45px;
+            }
+
+            .tools-tab i {
+                margin-right: 2px;
+                font-size: 0.7rem;
+            }
+
+            .tools-content {
+                padding: 10px;
+            }
+
+            .tools-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+
+            .tool-card {
+                padding: 8px 4px;
+            }
+
+            .tool-card i {
+                font-size: 1rem;
+            }
+
+            .tool-card span {
+                font-size: 0.65rem;
+            }
+
+            .settings-content {
+                padding: 10px;
+            }
+
+            .settings-option {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
+            .settings-range {
+                width: 100px;
+            }
+
+            .switch {
+                width: 38px;
+                height: 20px;
+            }
+
+            .switch input:checked + .slider:before {
+                transform: translateX(18px);
+            }
+
+            .slider:before {
+                height: 14px;
+                width: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .top-bar {
+                padding: 6px 8px;
+                min-height: 44px;
+            }
+
+            .logo-text {
+                font-size: 0.7rem;
+            }
+
+            .logo-icon {
+                width: 26px;
+                height: 26px;
+            }
+
+            .logo-icon i {
+                font-size: 0.9rem;
+            }
+
+            .action-btn, .theme-btn, .sound-btn, .tools-btn {
+                width: 26px;
+                height: 26px;
+                font-size: 0.7rem;
+            }
+
+            .mobile-menu-btn {
+                width: 26px;
+                height: 26px;
+                font-size: 0.8rem;
+            }
+
+            .chat-messages {
+                padding: 8px 8px 6px 8px;
+            }
+
+            .bubble {
+                padding: 8px 10px;
+                font-size: 0.8rem;
+                max-width: calc(100% - 34px);
+            }
+
+            .message .avatar {
+                width: 22px;
+                height: 22px;
+                font-size: 0.65rem;
+                margin: 0 3px;
+            }
+
+            .chat-input-area {
+                padding: 4px 6px 6px 6px;
+                gap: 4px;
+            }
+
+            .chat-input-area input {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+                height: 32px;
+            }
+
+            .chat-input-area input::placeholder {
+                font-size: 0.65rem;
+            }
+
+            .send-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 0.8rem;
+            }
+
+            .quick-question-btn {
+                font-size: 0.55rem;
+                padding: 2px 8px;
+            }
+
+            .tools-tab {
+                font-size: 0.5rem;
+                padding: 3px 5px;
+                min-width: 32px;
+            }
+
+            .tools-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 4px;
+            }
+
+            .tool-card {
+                padding: 4px 2px;
+            }
+
+            .tool-card i {
+                font-size: 0.8rem;
+            }
+
+            .tool-card span {
+                font-size: 0.5rem;
+            }
+
+            .ttt-board {
+                max-width: 200px;
+            }
+
+            .ttt-cell {
+                min-height: 40px;
+                font-size: 1.2rem;
+            }
+
+            .forca-letra {
+                width: 28px;
+                height: 28px;
+                font-size: 0.7rem;
+            }
+
+            .settings-btn {
+                font-size: 0.6rem;
+                padding: 4px 10px;
+                min-width: 50px;
+            }
+
+            .settings-range {
+                width: 70px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .mobile-menu-btn, .mobile-overlay {
+                display: none !important;
+            }
+
+            /* Desktop: sidebar fechada por padrão */
+            .history-sidebar {
+                transform: translateX(-100%) !important;
+                width: var(--sidebar-width) !important;
+                min-width: 200px !important;
+                position: relative !important;
+                left: auto !important;
+                top: auto !important;
+                height: auto !important;
+                z-index: auto !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                border-right: 1px solid var(--border-color) !important;
+            }
+
+            .history-sidebar:not(.closed) {
+                transform: translateX(0) !important;
+            }
+
+            .history-sidebar.closed {
+                transform: translateX(-100%) !important;
+                width: 0 !important;
+                min-width: 0 !important;
+                padding: 0 !important;
+                border-right: none !important;
+            }
+
+            .history-sidebar.closed * {
+                display: none !important;
+            }
+
+            .history-sidebar:not(.closed) * {
+                display: flex !important;
+            }
+
+            .history-sidebar:not(.closed) .history-list {
+                display: flex !important;
+            }
+
+            .chat-main {
+                width: 100% !important;
+                transition: width 0.3s ease;
+            }
+
+            .chat-main:not(.expanded) {
+                width: calc(100% - var(--sidebar-width)) !important;
+            }
+
+            .chat-main.expanded {
+                width: 100% !important;
+            }
+
+            .history-toggle {
+                display: flex !important;
+            }
+        }
+
+        /* Mobile menu button - hidden by default, shown on mobile via media query */
+        .mobile-menu-btn {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <div class="app-container">
+        <div class="history-toggle" id="historyToggle"><i class="fas fa-chevron-left" id="toggleIcon"></i></div>
+        
+        <aside class="history-sidebar closed" id="historySidebar">
+            <div class="history-header"><i class="fas fa-history"></i><h2>Histórico</h2></div>
+            <div class="history-list" id="historyList"></div>
+            <div class="new-chat-btn" id="newChatBtn"><i class="fas fa-plus-circle"></i> Novo chat</div>
+        </aside>
+        
+        <main class="chat-main expanded" id="chatMain">
+            <div class="top-bar">
+                <div class="logo-area">
+                    <!-- Mobile menu button -->
+                    <div class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></div>
+                    <div class="logo-icon"><i class="fas fa-leaf"></i></div>
+                    <span class="logo-text">VerdeChat INFINITY</span>
+                </div>
+                <div class="action-buttons">
+                    <div class="tools-btn" id="toolsToggle"><i class="fas fa-tools"></i></div>
+                    <div class="sound-btn" id="soundToggle"><i class="fas fa-volume-up" id="soundIcon"></i></div>
+                    <div class="theme-btn" id="themeToggle"><i class="fas fa-moon" id="themeIcon"></i></div>
+                    <div class="action-btn" id="settingsToggle"><i class="fas fa-cog"></i></div>
+                    <div class="action-btn"><i class="fas fa-headset"></i></div>
+                    <div class="action-btn"><i class="fas fa-user-circle"></i></div>
+                </div>
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="quick-questions-container"><div class="quick-questions-scroll" id="quickQuestionsScroll"></div></div>
+            <div class="chat-input-area">
+                <input type="text" id="userInput" placeholder="Converse naturalmente: 'bom dia', 'quero jogar', 'cria uma página de vendas'">
+                <button class="send-btn" id="sendButton"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </main>
+    </div>
+
+    <div class="tools-panel" id="toolsPanel">
+        <div class="tools-header"><h3><i class="fas fa-tools"></i> Ferramentas</h3><button class="close-tools" id="closeTools"><i class="fas fa-times"></i></button></div>
+        <div class="tools-tabs">
+            <div class="tools-tab active" data-tab="excel">Excel</div>
+            <div class="tools-tab" data-tab="word">Word</div>
+            <div class="tools-tab" data-tab="calc">Calculadoras</div>
+            <div class="tools-tab" data-tab="prod">Produtividade</div>
+            <div class="tools-tab" data-tab="curriculo">Currículo</div>
+            <div class="tools-tab" data-tab="jogos">Jogos</div>
+        </div>
+        <div class="tools-content">
+            <div class="tools-category active" id="tab-excel"><div class="category-title">Excel & Planilhas</div><div class="tools-grid" id="excel-grid"></div><div class="tool-result-area"><div class="tool-result-header">Resultado</div><div class="tool-result-content" id="excel-result">Clique em uma ferramenta acima para começar</div></div></div>
+            <div class="tools-category" id="tab-word"><div class="category-title">Word & Documentos</div><div class="tools-grid" id="word-grid"></div><div class="tool-result-area"><div class="tool-result-header">Resultado</div><div class="tool-result-content" id="word-result">Clique em uma ferramenta acima para começar</div></div></div>
+            <div class="tools-category" id="tab-calc"><div class="category-title">Calculadoras Úteis</div><div class="tools-grid" id="calc-grid"></div><div class="tool-result-area"><div class="tool-result-header">Resultado</div><div class="tool-result-content" id="calc-result">Clique em uma ferramenta acima para começar</div></div></div>
+            <div class="tools-category" id="tab-prod"><div class="category-title">Produtividade</div><div class="tools-grid" id="prod-grid"></div><div class="tool-result-area"><div class="tool-result-header">Resultado</div><div class="tool-result-content" id="prod-result">Clique em uma ferramenta acima para começar</div></div></div>
+            <div class="tools-category" id="tab-curriculo"><div class="category-title">Gerador de Currículo Profissional</div><div class="tools-grid" id="curriculo-grid"></div><div class="tool-result-area"><div class="tool-result-header">Resultado</div><div class="tool-result-content" id="curriculo-result">Clique em "Criar Currículo" para começar</div></div></div>
+            <div class="tools-category" id="tab-jogos"><div class="category-title">Jogos Simples</div><div class="tools-grid" id="jogos-grid"></div><div class="tool-result-area"><div class="tool-result-header">Resultado</div><div class="tool-result-content" id="jogos-result">Clique em um jogo acima para começar</div></div></div>
+        </div>
+    </div>
+
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-header"><h3><i class="fas fa-cog"></i> Configurações</h3><button class="close-settings" id="closeSettings"><i class="fas fa-times"></i></button></div>
+        <div class="settings-content">
+            <div class="settings-section"><div class="settings-section-title">Aparência</div>
+                <div class="settings-option"><div><div class="settings-option-label">Tema escuro/claro</div></div><label class="switch"><input type="checkbox" id="themeSwitch"><span class="slider"></span></label></div>
+                <div class="settings-option"><div><div class="settings-option-label">Tamanho da fonte</div></div><div><input type="range" id="fontSizeSlider" class="settings-range" min="0.8" max="1.2" step="0.01" value="0.95"></div></div>
+                <div class="settings-option"><div><div class="settings-option-label">Espaçamento</div></div><div><input type="range" id="spacingSlider" class="settings-range" min="10" max="30" step="1" value="18"></div></div>
+            </div>
+            <div class="settings-section"><div class="settings-section-title">Som</div>
+                <div class="settings-option"><div><div class="settings-option-label">Efeitos sonoros</div></div><label class="switch"><input type="checkbox" id="soundSwitch" checked><span class="slider"></span></label></div>
+                <div class="settings-option"><div><div class="settings-option-label">Volume</div></div><div><input type="range" id="volumeSlider" class="settings-range" min="0" max="100" step="1" value="50"></div></div>
+            </div>
+            <div class="settings-section"><div class="settings-section-title">Conversa</div>
+                <div class="settings-option"><div><div class="settings-option-label">Tempo de resposta</div></div><select id="responseSpeed"><option value="800">Rápido</option><option value="1200" selected>Normal</option><option value="1800">Lento</option></select></div>
+                <div class="settings-option"><div><div class="settings-option-label">Mostrar digitação</div></div><label class="switch"><input type="checkbox" id="typingIndicatorSwitch" checked><span class="slider"></span></label></div>
+                <div class="settings-option"><div><div class="settings-option-label">Streaming</div></div><label class="switch"><input type="checkbox" id="streamingSwitch" checked><span class="slider"></span></label></div>
+            </div>
+            <div class="settings-section"><div class="settings-section-title">Memória</div>
+                <div class="settings-option"><div><div class="settings-option-label">Memória de longo prazo</div></div><label class="switch"><input type="checkbox" id="memorySwitch" checked><span class="slider"></span></label></div>
+                <div class="settings-buttons"><button id="clearMemoryBtn" class="settings-btn-secondary">Limpar memória</button></div>
+            </div>
+            <div class="settings-section"><div class="settings-section-title">Dados</div>
+                <div class="settings-buttons"><button id="exportChatBtn" class="settings-btn-secondary">Exportar conversa</button><button id="clearHistoryBtn" class="settings-btn-secondary">Limpar histórico</button></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== JAVASCRIPT PRINCIPAL DO CHAT ==========
+        
+        // Elementos DOM
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+        const newChatBtn = document.getElementById('newChatBtn');
+        const historyList = document.getElementById('historyList');
+        const historySidebar = document.getElementById('historySidebar');
+        const chatMain = document.getElementById('chatMain');
+        const historyToggle = document.getElementById('historyToggle');
+        const toggleIcon = document.getElementById('toggleIcon');
+        const quickQuestionsScroll = document.getElementById('quickQuestionsScroll');
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const soundToggleBtn = document.getElementById('soundToggle');
+        const soundIcon = document.getElementById('soundIcon');
+        const toolsToggleBtn = document.getElementById('toolsToggle');
+        const toolsPanel = document.getElementById('toolsPanel');
+        const closeTools = document.getElementById('closeTools');
+        const settingsToggleBtn = document.getElementById('settingsToggle');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const closeSettings = document.getElementById('closeSettings');
+        const memorySwitch = document.getElementById('memorySwitch');
+        const clearMemoryBtn = document.getElementById('clearMemoryBtn');
+        const themeSwitch = document.getElementById('themeSwitch');
+        const fontSizeSlider = document.getElementById('fontSizeSlider');
+        const spacingSlider = document.getElementById('spacingSlider');
+        const soundSwitch = document.getElementById('soundSwitch');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const responseSpeed = document.getElementById('responseSpeed');
+        const typingIndicatorSwitch = document.getElementById('typingIndicatorSwitch');
+        const streamingSwitch = document.getElementById('streamingSwitch');
+        const exportChatBtn = document.getElementById('exportChatBtn');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileOverlay = document.getElementById('mobileOverlay');
+
+        let currentConversation = [];
+        let conversationCount = 0;
+        let isHistoryOpen = false; // ALTERADO: começa fechado
+        let isToolsOpen = false;
+        let isSettingsOpen = false;
+        let responseTime = 1200;
+        let showTyping = true;
+        let streamingEnabled = true;
+        let somAtivo = true;
+        let volumeAtual = 0.5;
+        let memoriaAtiva = true;
+        let nomeUsuario = null;
+        let tarefas = [];
+        let mensagemCount = 0;
+        let inicioConversa = new Date();
+
+        // Mobile menu
+        let isMobileMenuOpen = false;
+
+        function toggleMobileMenu() {
+            isMobileMenuOpen = !isMobileMenuOpen;
+            if (isMobileMenuOpen) {
+                historySidebar.classList.add('open');
+                historySidebar.classList.remove('closed');
+                mobileOverlay.classList.add('active');
+            } else {
+                historySidebar.classList.remove('open');
+                historySidebar.classList.add('closed');
+                mobileOverlay.classList.remove('active');
+            }
+        }
+
+        mobileMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMobileMenu();
+        });
+
+        mobileOverlay.addEventListener('click', () => {
+            if (isMobileMenuOpen) toggleMobileMenu();
+        });
+
+        // Close mobile menu when clicking a history item
+        document.addEventListener('click', (e) => {
+            if (isMobileMenuOpen && !historySidebar.contains(e.target) && e.target !== mobileMenuBtn) {
+                toggleMobileMenu();
+            }
+        });
+
+        function salvarMemoria() { if (!memoriaAtiva) return; localStorage.setItem('verdechat_memoria', JSON.stringify({ nome: nomeUsuario, tarefas: tarefas })); }
+        function carregarMemoria() { const saved = localStorage.getItem('verdechat_memoria'); if (saved) { try { const m = JSON.parse(saved); nomeUsuario = m.nome; tarefas = m.tarefas || []; } catch(e) {} } }
+        function limparMemoria() { nomeUsuario = null; tarefas = []; localStorage.removeItem('verdechat_memoria'); }
+        
+        memorySwitch.addEventListener('change', () => { memoriaAtiva = memorySwitch.checked; if (!memoriaAtiva) limparMemoria(); else carregarMemoria(); });
+        clearMemoryBtn.addEventListener('click', () => { if (confirm('Limpar memória?')) { limparMemoria(); addMessageDirect('bot', '🧹 Memória limpa!', false); } });
+
+        // Áudio
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+        function initAudio() { if (!audioCtx) audioCtx = new AudioCtx(); }
+        function playSound(tipo) {
+            if (!somAtivo) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(volumeAtual * 0.2, audioCtx.currentTime);
+                if (tipo === 'enviar') { osc.frequency.setValueAtTime(880, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1); }
+                else if (tipo === 'receber') { osc.frequency.setValueAtTime(440, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15); }
+                else { osc.frequency.setValueAtTime(659.25, audioCtx.currentTime); osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2); }
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+            } catch(e) {}
+        }
+
+        // Configurações
+        function applyFontSize(s) { document.documentElement.style.setProperty('--font-size-base', s + 'rem'); localStorage.setItem('chat_fontSize', s); }
+        function applySpacing(s) { document.documentElement.style.setProperty('--message-spacing', s + 'px'); localStorage.setItem('chat_spacing', s); }
+        function applySound(e) { somAtivo = e; if (soundSwitch) soundSwitch.checked = e; localStorage.setItem('chat_soundEnabled', e); }
+        function applyVolume(v) { volumeAtual = v / 100; localStorage.setItem('chat_volume', v); }
+        function applyResponseTime(t) { responseTime = parseInt(t); localStorage.setItem('chat_responseTime', t); }
+        function applyTypingIndicator(e) { showTyping = e; localStorage.setItem('chat_showTyping', e); }
+        function applyStreaming(e) { streamingEnabled = e; localStorage.setItem('chat_streaming', e); }
+        
+        function loadSettings() {
+            const fs = localStorage.getItem('chat_fontSize'); if (fs) { fontSizeSlider.value = fs; applyFontSize(parseFloat(fs)); }
+            const sp = localStorage.getItem('chat_spacing'); if (sp) { spacingSlider.value = sp; applySpacing(parseInt(sp)); }
+            const sd = localStorage.getItem('chat_soundEnabled'); if (sd !== null) applySound(sd === 'true');
+            const vol = localStorage.getItem('chat_volume'); if (vol) { volumeSlider.value = vol; applyVolume(parseInt(vol)); }
+            const rt = localStorage.getItem('chat_responseTime'); if (rt) { responseSpeed.value = rt; applyResponseTime(rt); }
+            const typ = localStorage.getItem('chat_showTyping'); if (typ !== null) { typingIndicatorSwitch.checked = typ === 'true'; applyTypingIndicator(typ === 'true'); }
+            const str = localStorage.getItem('chat_streaming'); if (str !== null) { streamingSwitch.checked = str === 'true'; applyStreaming(str === 'true'); }
+            carregarMemoria();
+        }
+        
+        fontSizeSlider.addEventListener('input', e => applyFontSize(parseFloat(e.target.value)));
+        spacingSlider.addEventListener('input', e => applySpacing(parseInt(e.target.value)));
+        soundSwitch.addEventListener('change', e => applySound(e.target.checked));
+        volumeSlider.addEventListener('input', e => applyVolume(parseInt(e.target.value)));
+        responseSpeed.addEventListener('change', e => applyResponseTime(e.target.value));
+        typingIndicatorSwitch.addEventListener('change', e => applyTypingIndicator(e.target.checked));
+        streamingSwitch.addEventListener('change', e => applyStreaming(e.target.checked));
+        
+        exportChatBtn.addEventListener('click', () => {
+            let txt = `Conversa\nData: ${new Date().toLocaleString()}\n${'='.repeat(50)}\n\n`;
+            currentConversation.forEach(m => txt += `${m.role === 'user' ? '👤' : '🤖'}: ${m.content}\n\n`);
+            const blob = new Blob([txt], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob); const a = document.createElement('a');
+            a.href = url; a.download = `conversa_${new Date().toISOString().slice(0,19)}.txt`; a.click(); URL.revokeObjectURL(url);
+        });
+        
+        clearHistoryBtn.addEventListener('click', () => { if (confirm('Limpar histórico?')) { historyList.innerHTML = ''; conversationCount = 0; addMessageDirect('bot', '🧹 Histórico limpo!', false); } });
+        
+        function toggleTools() { isToolsOpen = !isToolsOpen; if (isToolsOpen) { toolsPanel.classList.add('open'); toolsToggleBtn.classList.add('active'); if (isSettingsOpen) toggleSettings(); } else { toolsPanel.classList.remove('open'); toolsToggleBtn.classList.remove('active'); } playSound('notificacao'); }
+        function toggleSettings() { isSettingsOpen = !isSettingsOpen; if (isSettingsOpen) { settingsPanel.classList.add('open'); if (isToolsOpen) toggleTools(); } else { settingsPanel.classList.remove('open'); } playSound('notificacao'); }
+        toolsToggleBtn.addEventListener('click', toggleTools); closeTools.addEventListener('click', toggleTools);
+        settingsToggleBtn.addEventListener('click', toggleSettings); closeSettings.addEventListener('click', toggleSettings);
+        
+        function toggleTheme() { document.body.classList.toggle('light-theme'); themeIcon.className = document.body.classList.contains('light-theme') ? 'fas fa-sun' : 'fas fa-moon'; if (themeSwitch) themeSwitch.checked = !document.body.classList.contains('light-theme'); playSound('notificacao'); }
+        themeToggleBtn.addEventListener('click', toggleTheme); if (themeSwitch) themeSwitch.addEventListener('change', toggleTheme);
+        
+        soundToggleBtn.addEventListener('click', () => { somAtivo = !somAtivo; soundIcon.className = somAtivo ? 'fas fa-volume-up' : 'fas fa-volume-mute'; soundToggleBtn.classList.toggle('active', somAtivo); playSound('notificacao'); });
+        
+        function toggleHistory() { 
+            // Mobile: usa o menu hamburger
+            if (window.innerWidth <= 768) {
+                toggleMobileMenu();
+                return;
+            }
+            
+            // Desktop: toggle normal
+            isHistoryOpen = !isHistoryOpen; 
+            if (isHistoryOpen) { 
+                historySidebar.classList.remove('closed'); 
+                chatMain.classList.remove('expanded'); 
+                historyToggle.classList.remove('closed'); 
+                toggleIcon.className = 'fas fa-chevron-left'; 
+            } else { 
+                historySidebar.classList.add('closed'); 
+                chatMain.classList.add('expanded'); 
+                historyToggle.classList.add('closed'); 
+                toggleIcon.className = 'fas fa-chevron-right'; 
+            } 
+            playSound('notificacao'); 
+        }
+        historyToggle.addEventListener('click', toggleHistory);
+        
+        // Inicializar com a sidebar fechada
+        function initSidebarState() {
+            // Desktop: sidebar fechada por padrão
+            if (window.innerWidth > 768) {
+                historySidebar.classList.add('closed');
+                chatMain.classList.add('expanded');
+                historyToggle.classList.add('closed');
+                toggleIcon.className = 'fas fa-chevron-right';
+                isHistoryOpen = false;
+            } else {
+                // Mobile: sidebar fechada por padrão
+                historySidebar.classList.add('closed');
+                historySidebar.classList.remove('open');
+                chatMain.classList.add('expanded');
+                isHistoryOpen = false;
+                isMobileMenuOpen = false;
+            }
+        }
+        
+        // ========== FUNÇÕES DE MENSAGEM CORRIGIDAS ==========
+        
+        async function addMessageStreaming(role, content, save = true) {
+            const div = document.createElement('div'); 
+            div.classList.add('message', role);
+            
+            const avatar = document.createElement('div'); 
+            avatar.classList.add('avatar');
+            avatar.innerHTML = role === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+            
+            const bubble = document.createElement('div'); 
+            bubble.classList.add('bubble');
+            bubble.style.whiteSpace = 'normal';
+            bubble.style.wordBreak = 'break-word';
+            bubble.style.display = 'inline-block';
+            
+            div.appendChild(avatar); 
+            div.appendChild(bubble);
+            chatMessages.appendChild(div);
+            
+            if (role === 'bot' && streamingEnabled) {
+                let txt = '';
+                const caracteres = [...content];
+                
+                for (let i = 0; i < caracteres.length; i++) {
+                    txt += caracteres[i];
+                    bubble.textContent = txt;
+                    
+                    const isNearBottom = chatMessages.scrollHeight - chatMessages.clientHeight <= chatMessages.scrollTop + 100;
+                    if (isNearBottom) {
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+                    
+                    await new Promise(r => setTimeout(r, 15));
+                }
+            } else { 
+                bubble.textContent = content;
+            }
+            
+            chatMessages.scrollTo({ behavior: 'smooth', top: chatMessages.scrollHeight });
+            
+            if (save && role === 'user') saveToHistory(content);
+            if (save) currentConversation.push({ role, content });
+        }
+        
+        function addMessageDirect(role, content, save = true) {
+            const div = document.createElement('div'); 
+            div.classList.add('message', role);
+            
+            const avatar = document.createElement('div'); 
+            avatar.classList.add('avatar');
+            avatar.innerHTML = role === 'user' ? '<i class="fas fa-user"></i>' : '<i class="fas fa-robot"></i>';
+            
+            const bubble = document.createElement('div'); 
+            bubble.classList.add('bubble');
+            bubble.style.whiteSpace = 'normal';
+            bubble.style.wordBreak = 'break-word';
+            bubble.style.display = 'inline-block';
+            bubble.textContent = content;
+            
+            div.appendChild(avatar); 
+            div.appendChild(bubble);
+            chatMessages.appendChild(div);
+            
+            chatMessages.scrollTo({ behavior: 'smooth', top: chatMessages.scrollHeight });
+            
+            if (save && role === 'user') saveToHistory(content);
+            if (save) currentConversation.push({ role, content });
+        }
+        
+        function saveToHistory(content) {
+            const item = document.createElement('div'); item.classList.add('history-item');
+            const title = document.createElement('div'); title.classList.add('history-title'); title.innerHTML = `💬 Conversa ${++conversationCount}`;
+            const preview = document.createElement('div'); preview.classList.add('history-preview'); preview.textContent = content.substring(0, 50) + (content.length > 50 ? '...' : '');
+            item.appendChild(title); item.appendChild(preview);
+            item.addEventListener('click', () => { userInput.value = content; processUserMessage(); });
+            historyList.insertBefore(item, historyList.firstChild);
+        }
+        
+        function showTypingIndicator() { if (!showTyping) return; const d = document.createElement('div'); d.classList.add('message', 'bot', 'typing-message'); d.id = 'typingIndicator'; d.innerHTML = '<div class="avatar"><i class="fas fa-robot"></i></div><div class="bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>'; chatMessages.appendChild(d); d.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+        function removeTypingIndicator() { const i = document.getElementById('typingIndicator'); if (i) i.remove(); }
+        
+        // Processamento de mensagem
+        let isProcessing = false;
+        
+        async function processUserMessage() {
+            const text = userInput.value.trim();
+            
+            if (text === '') return;
+            if (isProcessing) return;
+            
+            isProcessing = true;
+            
+            mensagemCount++;
+            addMessageDirect('user', text);
+            userInput.value = '';
+            playSound('enviar');
+            
+            let resposta = null;
+            if (typeof window.processarComandoNatural === 'function') {
+                resposta = window.processarComandoNatural(text);
+            }
+            
+            if (resposta) {
+                showTypingIndicator();
+                setTimeout(async () => {
+                    removeTypingIndicator();
+                    await addMessageStreaming('bot', resposta);
+                    playSound('receber');
+                    isProcessing = false;
+                }, 300);
+                return;
+            }
+            
+            let respostaPadrao = null;
+            if (typeof window.gerarRespostaPadrao === 'function') {
+                respostaPadrao = window.gerarRespostaPadrao(text);
+            } else {
+                respostaPadrao = "Interessante! Me conta mais sobre isso?";
+            }
+            
+            showTypingIndicator();
+            setTimeout(async () => {
+                removeTypingIndicator();
+                await addMessageStreaming('bot', respostaPadrao);
+                playSound('receber');
+                isProcessing = false;
+            }, responseTime);
+        }
+        
+        // Ferramentas
+        const ferramentas = {
+            excel: [{ id: "vlookup", icon: "fa-search", name: "PROCV" }, { id: "if", icon: "fa-code-branch", name: "SE" }, { id: "sumif", icon: "fa-calculator", name: "SOMASE" }, { id: "concat", icon: "fa-link", name: "CONCATENAR" }, { id: "shortcuts", icon: "fa-keyboard", name: "Atalhos" }, { id: "pivot", icon: "fa-table", name: "Tabela Dinâmica" }],
+            word: [{ id: "shortcuts-word", icon: "fa-keyboard", name: "Atalhos" }, { id: "format", icon: "fa-paragraph", name: "Formatação" }, { id: "styles", icon: "fa-paint-roller", name: "Estilos" }, { id: "summary", icon: "fa-file-alt", name: "Resumir" }],
+            calc: [{ id: "percent", icon: "fa-percent", name: "Porcentagem" }, { id: "date-diff", icon: "fa-calendar-alt", name: "Diferença datas" }, { id: "discount", icon: "fa-tag", name: "Desconto" }, { id: "convert", icon: "fa-exchange-alt", name: "Conversor" }],
+            prod: [{ id: "text-clean", icon: "fa-broom", name: "Limpar texto" }, { id: "text-count", icon: "fa-chart-simple", name: "Contador" }, { id: "password", icon: "fa-lock", name: "Senha" }, { id: "timer", icon: "fa-hourglass-half", name: "Timer" }],
+            curriculo: [{ id: "curriculo", icon: "fa-file-alt", name: "Criar Currículo" }],
+            jogos: [{ id: "velha", icon: "fa-border-all", name: "Jogo da Velha" }, { id: "forca", icon: "fa-gamepad", name: "Forca" }, { id: "quiz", icon: "fa-question-circle", name: "Quiz" }, { id: "adivinhacao", icon: "fa-brain", name: "Adivinhe Número" }]
+        };
+        
+        function mostrarResultado(aba, c) { const d = document.getElementById(`${aba}-result`); if (d) d.innerHTML = c; playSound('notificacao'); }
+        function gerarCurriculo() {
+            const d = document.getElementById('curriculo-result');
+            d.innerHTML = `<div class="tool-input-group"><input id="cur-nome" placeholder="Nome"><input id="cur-email" placeholder="Email"><input id="cur-tel" placeholder="Telefone"><input id="cur-cargo" placeholder="Cargo"><textarea id="cur-exp" rows="3" placeholder="Experiência"></textarea><button id="gerar-cur">Gerar Word</button></div>`;
+            document.getElementById('gerar-cur').onclick = () => {
+                const nome = document.getElementById('cur-nome').value || "Currículo";
+                const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Currículo</title><style>body{font-family:Calibri;max-width:800px;margin:40px auto;padding:20px;}</style></head><body><h1>${nome}</h1><p>Email: ${document.getElementById('cur-email').value}</p><p>Telefone: ${document.getElementById('cur-tel').value}</p><h2>Objetivo</h2><p>${document.getElementById('cur-cargo').value}</p><h2>Experiência</h2><p>${document.getElementById('cur-exp').value}</p></body></html>`;
+                const blob = new Blob([html], { type: 'application/msword' });
+                const url = URL.createObjectURL(blob); const a = document.createElement('a');
+                a.href = url; a.download = `curriculo_${nome.replace(/\s/g, '_')}.doc`; a.click(); URL.revokeObjectURL(url);
+            };
+        }
+        
+        const toolFuncs = {
+            vlookup: () => mostrarResultado('excel', '📊 PROCV: =PROCV(valor; matriz; coluna; 0)'),
+            if: () => mostrarResultado('excel', '📐 SE: =SE(condição; verdadeiro; falso)'),
+            sumif: () => mostrarResultado('excel', '💰 SOMASE: =SOMASE(intervalo; critério)'),
+            concat: () => mostrarResultado('excel', '🔗 CONCATENAR: =CONCATENAR(A2; " "; B2)'),
+            shortcuts: () => mostrarResultado('excel', '⚡ Atalhos: F2, F4, Ctrl+Shift+L, Alt+='),
+            pivot: () => mostrarResultado('excel', '📊 Tabela Dinâmica: Inserir > Tabela Dinâmica'),
+            'shortcuts-word': () => mostrarResultado('word', '⚡ Atalhos Word: Ctrl+B/I/U, Ctrl+E/J/D/Q, F7'),
+            format: () => mostrarResultado('word', '📝 Formatação: Use estilos, Ctrl+Shift+>'),
+            styles: () => mostrarResultado('word', '🎨 Estilos: Título 1, Título 2, Normal'),
+            summary: () => mostrarResultado('word', '📄 Resumir texto: Cole o texto para resumir'),
+            percent: () => mostrarResultado('calc', '🧮 Porcentagem: Digite "20% de 100"'),
+            'date-diff': () => mostrarResultado('calc', '📅 Diferença: Digite "01/01/2024 e 31/12/2024"'),
+            discount: () => mostrarResultado('calc', '💰 Desconto: Digite "100 com 20% de desconto"'),
+            convert: () => mostrarResultado('calc', '🔄 Conversor: Digite "1 kg g" ou "100 cm m"'),
+            'text-clean': () => mostrarResultado('prod', '🧹 Limpar texto: Cole o texto'),
+            'text-count': () => mostrarResultado('prod', '📊 Contador: Cole o texto'),
+            password: () => { let p=''; for(let i=0;i<12;i++) p+='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%'[Math.floor(Math.random()*64)]; mostrarResultado('prod', `🔐 Senha: ${p}<br><button onclick="navigator.clipboard.writeText('${p}')">Copiar</button>`); },
+            timer: () => mostrarResultado('prod', '⏲️ Timer 25min<br><div id="td">25:00</div><button onclick="let t=1500,i=setInterval(()=>{let m=Math.floor(t/60),s=t%60;document.getElementById(\'td\').innerText=m+":"+s.toString().padStart(2,0);if(t<=0)clearInterval(i);t--;},1000)">Iniciar</button>'),
+            curriculo: () => gerarCurriculo(),
+            
+            velha: () => {
+                let board = ['', '', '', '', '', '', '', '', ''];
+                let currentPlayer = 'X';
+                let gameActive = true;
+                let vsBot = true;
+                
+                const winPatterns = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
+                
+                function checkWinner() {
+                    for (let pattern of winPatterns) {
+                        const [a,b,c] = pattern;
+                        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                            gameActive = false;
+                            return board[a];
+                        }
+                    }
+                    if (!board.includes('')) {
+                        gameActive = false;
+                        return 'empate';
+                    }
+                    return null;
+                }
+                
+                function botMove() {
+                    if (!gameActive || currentPlayer !== 'O') return;
+                    setTimeout(() => {
+                        let emptySpots = board.map((spot, idx) => spot === '' ? idx : null).filter(v => v !== null);
+                        if (emptySpots.length === 0) return;
+                        const randomSpot = emptySpots[Math.floor(Math.random() * emptySpots.length)];
+                        board[randomSpot] = 'O';
+                        renderBoard();
+                        const winner = checkWinner();
+                        if (winner === 'O') { updateStatus(); }
+                        else if (winner === 'empate') { updateStatus(); }
+                        else { currentPlayer = 'X'; updateStatus(); }
+                    }, 300);
+                }
+                
+                function makeMove(index) {
+                    if (!gameActive || board[index] !== '' || (vsBot && currentPlayer !== 'X')) return;
+                    board[index] = currentPlayer;
+                    renderBoard();
+                    const winner = checkWinner();
+                    if (winner === 'X') { updateStatus(); }
+                    else if (winner === 'O') { updateStatus(); }
+                    else if (winner === 'empate') { updateStatus(); }
+                    else {
+                        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                        updateStatus();
+                        if (vsBot && currentPlayer === 'O' && gameActive) botMove();
+                    }
+                }
+                
+                function resetGame() { board = ['', '', '', '', '', '', '', '', '']; currentPlayer = 'X'; gameActive = true; renderBoard(); updateStatus(); }
+                function toggleMode() { vsBot = !vsBot; resetGame(); document.getElementById('ttt-mode-btn').textContent = vsBot ? '🤖 vs Bot' : '👥 2 Jogadores'; }
+                
+                const gameBoard = document.createElement('div');
+                gameBoard.className = 'ttt-board';
+                gameBoard.style.cssText = 'display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 15px 0;';
+                
+                function renderBoard() {
+                    gameBoard.innerHTML = '';
+                    board.forEach((cell, idx) => {
+                        const cellDiv = document.createElement('div');
+                        cellDiv.className = 'ttt-cell';
+                        cellDiv.style.cssText = 'aspect-ratio: 1; background: var(--input-bg); border: 2px solid var(--accent); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; cursor: pointer;';
+                        cellDiv.textContent = cell;
+                        cellDiv.onclick = () => makeMove(idx);
+                        gameBoard.appendChild(cellDiv);
+                    });
+                }
+                
+                const statusDiv = document.createElement('div');
+                statusDiv.className = 'ttt-status';
+                function updateStatus() {
+                    const winner = checkWinner();
+                    if (winner === 'X') statusDiv.innerHTML = '🏆 Jogador X venceu! 🎉';
+                    else if (winner === 'O') statusDiv.innerHTML = vsBot ? '🤖 Bot venceu! 💻' : '🏆 Jogador O venceu! 🎉';
+                    else if (winner === 'empate') statusDiv.innerHTML = '🤝 Empate!';
+                    else statusDiv.innerHTML = vsBot ? (currentPlayer === 'X' ? '🎮 Sua vez (X)' : '🤖 Bot pensando...') : `🎮 Vez do Jogador ${currentPlayer}`;
+                }
+                
+                const resetBtn = document.createElement('button'); resetBtn.textContent = '🔄 Nova Partida'; resetBtn.className = 'ttt-btn'; resetBtn.onclick = resetGame;
+                const modeBtn = document.createElement('button'); modeBtn.id = 'ttt-mode-btn'; modeBtn.textContent = '🤖 vs Bot'; modeBtn.className = 'ttt-btn'; modeBtn.onclick = toggleMode;
+                const controlsDiv = document.createElement('div'); controlsDiv.style.cssText = 'display: flex; gap: 10px; justify-content: center; margin-top: 15px; flex-wrap: wrap;';
+                controlsDiv.appendChild(resetBtn); controlsDiv.appendChild(modeBtn);
+                const container = document.createElement('div'); container.appendChild(statusDiv); container.appendChild(gameBoard); container.appendChild(controlsDiv);
+                renderBoard(); updateStatus();
+                mostrarResultado('jogos', container.innerHTML);
+            },
+
+            forca: () => {
+                const palavras = [
+                    { palavra: 'JAVASCRIPT', dica: 'Linguagem de programação' },
+                    { palavra: 'PROGRAMACAO', dica: 'Arte de escrever códigos' },
+                    { palavra: 'COMPUTADOR', dica: 'Máquina eletrônica' },
+                    { palavra: 'DESENVOLVEDOR', dica: 'Profissional que cria software' }
+                ];
+                let palavraAtual = null, letrasDescobertas = [], tentativasRestantes = 6, letrasErradas = [], jogoAtivo = true;
+                function escolherPalavra() { const random = Math.floor(Math.random() * palavras.length); palavraAtual = palavras[random]; letrasDescobertas = Array(palavraAtual.palavra.length).fill('_'); tentativasRestantes = 6; letrasErradas = []; jogoAtivo = true; }
+                function desenharForca() { const estagios = ['   +---+\n       |\n       |\n       |\n      ===', '   +---+\n   O   |\n       |\n       |\n      ===', '   +---+\n   O   |\n   |   |\n       |\n      ===', '   +---+\n   O   |\n  /|   |\n       |\n      ===', '   +---+\n   O   |\n  /|\\  |\n       |\n      ===', '   +---+\n   O   |\n  /|\\  |\n  /    |\n      ===', '   +---+\n   O   |\n  /|\\  |\n  / \\  |\n      ===']; return `<pre style="font-family: monospace; font-size: 14px; color: var(--accent);">${estagios[6 - tentativasRestantes]}</pre>`; }
+                function tentarLetra(letra) { if (!jogoAtivo || letrasErradas.includes(letra) || letrasDescobertas.includes(letra)) return; if (palavraAtual.palavra.includes(letra)) { for (let i = 0; i < palavraAtual.palavra.length; i++) if (palavraAtual.palavra[i] === letra) letrasDescobertas[i] = letra; if (!letrasDescobertas.includes('_')) jogoAtivo = false; } else { letrasErradas.push(letra); tentativasRestantes--; if (tentativasRestantes === 0) jogoAtivo = false; } renderJogo(); }
+                function renderJogo() { 
+                    const container = document.getElementById('forca-container'); 
+                    if (!container) return; 
+                    container.innerHTML = `<div style="text-align:center;">${desenharForca()}<div><strong>Dica:</strong> ${palavraAtual.dica}</div><div style="font-size:1.8rem;letter-spacing:6px;margin:12px 0;font-family:monospace;">${letrasDescobertas.join(' ')}</div><div><strong>Letras erradas:</strong> ${letrasErradas.join(', ') || 'nenhuma'}</div><div><strong>Tentativas:</strong> ${tentativasRestantes}</div><div id="forca-mensagem"></div><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:12px 0;">${'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l => `<button class="forca-letra" data-letra="${l}" ${(!jogoAtivo || letrasDescobertas.includes(l) || letrasErradas.includes(l)) ? 'disabled' : ''}>${l}</button>`).join('')}</div><button id="forca-novo-jogo" class="ttt-btn">🔄 Nova Palavra</button></div>`; 
+                    document.querySelectorAll('.forca-letra').forEach(btn => { if (!btn.disabled) btn.onclick = () => tentarLetra(btn.getAttribute('data-letra')); }); 
+                    document.getElementById('forca-novo-jogo').onclick = () => { escolherPalavra(); renderJogo(); }; 
+                    if (!jogoAtivo) { const msg = document.getElementById('forca-mensagem'); if (msg) msg.innerHTML = tentativasRestantes === 0 ? `💀 GAME OVER! A palavra era: ${palavraAtual.palavra}` : '🎉 PARABÉNS! Você venceu!'; } 
+                }
+                escolherPalavra(); mostrarResultado('jogos', '<div id="forca-container"></div>'); renderJogo();
+            },
+
+            quiz: () => {
+                const perguntas = [
+                    { pergunta: "Qual linguagem é usada para estilizar páginas web?", opcoes: ["HTML", "CSS", "JavaScript", "Python"], correta: 1 },
+                    { pergunta: "O que significa CSS?", opcoes: ["Computer Style Sheets", "Creative Style Sheets", "Cascading Style Sheets", "Colorful Style Sheets"], correta: 2 },
+                    { pergunta: "Qual símbolo é usado para comentários em JavaScript?", opcoes: ["<!-- -->", "//", "/* */", "Ambos // e /* */"], correta: 3 }
+                ];
+                let perguntaAtual = 0, pontuacao = 0, quizFinalizado = false;
+                function carregarPergunta() { if (perguntaAtual >= perguntas.length) { finalizarQuiz(); return; } const p = perguntas[perguntaAtual]; const container = document.getElementById('quiz-container'); if (!container) return; container.innerHTML = `<div><div><strong>Pergunta ${perguntaAtual+1} de ${perguntas.length}</strong></div><div class="quiz-question">${p.pergunta}</div><div class="quiz-options">${p.opcoes.map((op,idx) => `<button class="quiz-opcao" data-opcao="${idx}">${String.fromCharCode(65+idx)}. ${op}</button>`).join('')}</div><div>Pontuação: ${pontuacao}/${perguntas.length}</div></div>`; document.querySelectorAll('.quiz-opcao').forEach(btn => btn.onclick = () => responderPergunta(parseInt(btn.getAttribute('data-opcao')))); }
+                function responderPergunta(opcao) { if (quizFinalizado) return; const p = perguntas[perguntaAtual]; if (opcao === p.correta) pontuacao++; perguntaAtual++; setTimeout(() => carregarPergunta(), 1000); }
+                function finalizarQuiz() { quizFinalizado = true; const container = document.getElementById('quiz-container'); if (!container) return; container.innerHTML = `<div style="text-align:center;"><h3>Quiz Finalizado!</h3><p>Pontuação: ${pontuacao} de ${perguntas.length}</p><button id="quiz-reiniciar" class="ttt-btn">🔄 Jogar Novamente</button></div>`; document.getElementById('quiz-reiniciar').onclick = () => { perguntaAtual = 0; pontuacao = 0; quizFinalizado = false; carregarPergunta(); }; }
+                mostrarResultado('jogos', '<div id="quiz-container"></div>'); carregarPergunta();
+            },
+
+            adivinhacao: () => {
+                let numeroSecreto = Math.floor(Math.random() * 100) + 1, tentativas = 0, maxTentativas = 10, jogoAtivo = true;
+                function fazerPalpite(palpite) { 
+                    if (!jogoAtivo) return; 
+                    const num = parseInt(palpite); 
+                    if (isNaN(num) || num < 1 || num > 100) { 
+                        const display = document.getElementById('adivinhacao-display');
+                        if (display) display.innerHTML = '⚠️ Digite um número entre 1 e 100!'; 
+                        return; 
+                    } 
+                    tentativas++; 
+                    const display = document.getElementById('adivinhacao-display');
+                    if (num === numeroSecreto) { 
+                        if (display) display.innerHTML = `🎉 PARABÉNS! Acertou em ${tentativas} tentativas!`; 
+                        jogoAtivo = false; 
+                        const input = document.getElementById('adivinhacao-palpite');
+                        const btn = document.getElementById('adivinhacao-btn');
+                        if (input) input.disabled = true;
+                        if (btn) btn.disabled = true;
+                    } else if (tentativas >= maxTentativas) { 
+                        if (display) display.innerHTML = `💀 GAME OVER! O número era ${numeroSecreto}`; 
+                        jogoAtivo = false; 
+                    } else { 
+                        const dica = num < numeroSecreto ? '📈 MAIOR' : '📉 MENOR'; 
+                        if (display) display.innerHTML = `${dica}! Tentativas restantes: ${maxTentativas - tentativas}`; 
+                        const input = document.getElementById('adivinhacao-palpite');
+                        if (input) input.value = ''; 
+                    } 
+                    const historico = document.getElementById('adivinhacao-historico'); 
+                    if (historico) historico.innerHTML += `<div>${tentativas}. ${num} - ${num === numeroSecreto ? '✅ ACERTOU' : (num < numeroSecreto ? '📈 Maior' : '📉 Menor')}</div>`; 
+                }
+                function reiniciar() { 
+                    numeroSecreto = Math.floor(Math.random() * 100) + 1; 
+                    tentativas = 0; 
+                    jogoAtivo = true; 
+                    const display = document.getElementById('adivinhacao-display');
+                    if (display) display.innerHTML = '🎮 Adivinhe o número entre 1 e 100!'; 
+                    const input = document.getElementById('adivinhacao-palpite');
+                    const btn = document.getElementById('adivinhacao-btn');
+                    if (input) { input.disabled = false; input.value = ''; }
+                    if (btn) btn.disabled = false;
+                    const historico = document.getElementById('adivinhacao-historico'); 
+                    if (historico) historico.innerHTML = '<strong>Histórico:</strong><br>'; 
+                }
+                mostrarResultado('jogos', `<div><div id="adivinhacao-display" style="background:var(--accent);padding:12px;border-radius:12px;margin:10px 0;">🎮 Adivinhe o número entre 1 e 100!</div><div style="display:flex;gap:10px;flex-wrap:wrap;"><input id="adivinhacao-palpite" type="number" placeholder="Palpite" style="flex:1;padding:12px;border-radius:8px;min-width:100px;"><button id="adivinhacao-btn" class="ttt-btn">🔍 Palpite</button></div><div id="adivinhacao-historico" style="margin:10px 0;padding:10px;background:var(--input-bg);border-radius:12px;max-height:150px;overflow-y:auto;"><strong>Histórico:</strong><br></div><button id="adivinhacao-reiniciar" class="ttt-btn">🔄 Novo Jogo</button></div>`);
+                const btn = document.getElementById('adivinhacao-btn');
+                const input = document.getElementById('adivinhacao-palpite');
+                if (btn) btn.onclick = () => fazerPalpite(document.getElementById('adivinhacao-palpite').value);
+                if (input) input.addEventListener('keypress', (e) => { if (e.key === 'Enter') fazerPalpite(e.target.value); });
+                const reiniciarBtn = document.getElementById('adivinhacao-reiniciar');
+                if (reiniciarBtn) reiniciarBtn.onclick = reiniciar;
+            }
+        };
+        
+        function construirGrids() { for(const [cat, tools] of Object.entries(ferramentas)) { const g = document.getElementById(`${cat}-grid`); if(g){ g.innerHTML = ''; tools.forEach(t=>{ const c = document.createElement('div'); c.className='tool-card'; c.innerHTML=`<i class="fas ${t.icon}"></i><span>${t.name}</span>`; c.onclick=()=>toolFuncs[t.id](); g.appendChild(c); }); } } }
+        
+        document.querySelectorAll('.tools-tab').forEach(t=>{ t.addEventListener('click',()=>{ const aba=t.getAttribute('data-tab'); document.querySelectorAll('.tools-category').forEach(c=>c.classList.remove('active')); document.querySelectorAll('.tools-tab').forEach(tt=>tt.classList.remove('active')); document.getElementById(`tab-${aba}`)?.classList.add('active'); t.classList.add('active'); }); });
+        
+        const quickQs = [
+            { icon: "👋", text: "Bom dia" }, { icon: "🌙", text: "Boa noite" }, { icon: "😄", text: "Conte uma piada" },
+            { icon: "✨", text: "Me conta uma curiosidade" }, { icon: "📋", text: "Adicionar comprar leite" }, 
+            { icon: "📋", text: "Minhas tarefas" }, { icon: "🕐", text: "Que horas são" },
+            { icon: "🧠", text: "O que você sabe fazer" }, { icon: "🎨", text: "cria uma página de vendas" }
+        ];
+        quickQs.forEach(q => { const b = document.createElement('span'); b.classList.add('quick-question-btn'); b.innerHTML = `${q.icon} ${q.text}`; b.addEventListener('click', () => { userInput.value = q.text; processUserMessage(); }); quickQuestionsScroll.appendChild(b); });
+        
+        function initializeChat() {
+            chatMessages.innerHTML = '';
+            currentConversation = [];
+            mensagemCount = 0;
+            inicioConversa = new Date();
+            let welcome = `🌿 VerdeChat INFINITY - Versão Corrigida!\n\n`;
+            if (nomeUsuario && memoriaAtiva) welcome += `👋 Olá ${nomeUsuario}! Que bom ver você! 😊\n\n`;
+            welcome += `🎮 JOGOS DISPONÍVEIS:\n`;
+            welcome += `• 🎮 Jogo da Velha (vs Bot ou 2 Jogadores)\n`;
+            welcome += `• 🔤 Jogo da Forca (com dicas)\n`;
+            welcome += `• 📝 Quiz de Programação\n`;
+            welcome += `• 🔢 Adivinhe o Número\n\n`;
+            welcome += `✅ Agora as mensagens aparecem corretamente, sem quebrar as palavras! "oi" aparece como "oi" e não "o" em uma linha e "i" em outra! 🚀`;
+            addMessageDirect('bot', welcome, false);
+            playSound('receber');
+        }
+        
+        // Event listeners
+        sendButton.addEventListener('click', processUserMessage);
+        userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') processUserMessage(); });
+        newChatBtn.addEventListener('click', initializeChat);
+        
+        construirGrids();
+        loadSettings();
+        initializeChat();
+        initSidebarState();
+
+        // Handle window resize for mobile/desktop transitions
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768 && isMobileMenuOpen) {
+                toggleMobileMenu();
+            }
+            // Se for desktop, garantir que a sidebar mantenha o estado
+            if (window.innerWidth > 768) {
+                if (!isHistoryOpen) {
+                    historySidebar.classList.add('closed');
+                    chatMain.classList.add('expanded');
+                    historyToggle.classList.add('closed');
+                    toggleIcon.className = 'fas fa-chevron-right';
+                }
+            }
+        });
+    </script>
+    
+    <!-- MÓDULO DE CONHECIMENTO (500+ PALAVRAS) -->
+    <script src="conhecimento.js"></script>
+    
+    <!-- GERADOR DE SITES -->
+    <script src="gerador-sites.js"></script>
+    
+    <!-- CHAT LOCAL -->
+    <script src="chat-local.js"></script>
+
+    <!-- ⭐ SISTEMA DE LEMBRETES E ALARMES (NOVO) -->
+    <script src="lembretes.js"></script>
+</body>
+</html>
